@@ -17,7 +17,7 @@
   (POST "/slack" [user_id text]
         (let [results (search sources text)]
           (response
-            (message (str "Found " (count results) " matches for \"" text "\"")
+            (message (str "Found " (count results) " " (if (= (count results) 1) "match" "matches") " for \"" text "\"")
                      (conj (vec (map image-attachment-choice results)) cancel-attachment-choice)))))
   (POST "/slack-action" [payload]
         (let [data (json/parse-string payload true) user (:user data) button (first (:actions data))]
