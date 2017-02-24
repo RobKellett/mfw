@@ -6,14 +6,16 @@
   {:text text :attachments attachments})
 
 (defn image-attachment [image]
-  {:author_name (:name (:source image)) :image_url (:url image)})
+  {:author_name (:name (:source image)) :title (:url image) :image_url (:url image) :fallback (:url image)})
 
 (defn image-attachment-choice [image]
   (assoc (image-attachment image)
-    :actions [{:name "post" :text "Select" :type "button" :value (:url image)}]))
+    :callback_id (:url image)
+    :actions [{:name "post" :text "Post this" :type "button" :value (:url image)}]))
 
 (def cancel-attachment-choice
-  {:actions [{:name "cancel" :text "Cancel" :type "button"}]})
+  {:callback_id "cancel" :color "danger" :text "Didn't find what you're looking for?"
+   :fallback "Cancel" :actions [{:name "cancel" :text "Cancel" :type "button"}]})
 
 (defn slack-oauth [code]
   (http/post "https://slack.com/api/oauth.access"

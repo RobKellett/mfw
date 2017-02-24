@@ -12,17 +12,20 @@
 
 (defroutes api-routes
   (POST "/slack" [user_id text]
-        (let [results (search conf/sources text)]
+        (let [results (take 5 (search conf/sources text))]
           (response
-            (message (str "Found " (count results) " " (if (= (count results) 1) "match" "matches") " for \"" text "\"")
-                     (conj (vec (map image-attachment-choice results)) cancel-attachment-choice)))))
+            (if (= (count results) 0)
+              (message (str "No results found for \"" text "\"") nil)
+              (message (str "Found " (count results) " " (if (= (count results) 1) "match" "matches") " for \"" text "\"")
+                       (conj (vec (map image-attachment-choice results)) cancel-attachment-choice))))))
   (POST "/slack-action" [payload]
         (let [data (json/parse-string payload true) user (:user data) button (first (:actions data))]
           (response (assoc
             (if (= (:name button) "post")
-              (message nil (image-attachment {:source {:name (:name user)} :url (:value button)}))
+              (message (str "<@" (:id user) "|" (:name user) ">") [(image-attachment {:source {:name nil} :url (:value button)})])
               nil)
-            :delete_original true))))
+            :delete_original true
+            :response_type "in_channel"))))
   (GET "/slack-oauth" [code]
        (slack-oauth code)))
 
