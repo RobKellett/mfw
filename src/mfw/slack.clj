@@ -1,4 +1,6 @@
-(ns mfw.slack)
+(ns mfw.slack
+  (require [mfw.conf :as conf]
+           [clj-http.client :as http]))
 
 (defn message [text attachments]
   {:text text :attachments attachments})
@@ -12,3 +14,9 @@
 
 (def cancel-attachment-choice
   {:actions [{:name "cancel" :text "Cancel" :type "button"}]})
+
+(defn slack-oauth [code]
+  (http/post "https://slack.com/api/oauth.access"
+             {:form-params {:client_id (:id conf/slack-oauth)
+                            :client_secret (:secret conf/slack-oauth)
+                            :code code}}))
